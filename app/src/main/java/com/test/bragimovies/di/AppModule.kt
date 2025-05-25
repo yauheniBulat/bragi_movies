@@ -1,8 +1,11 @@
 package com.test.bragimovies.di
 
+import com.test.bragimovies.BuildConfig
 import com.test.bragimovies.data.network.MovieApi
 import com.test.bragimovies.data.repositiory.MovieRepositoryImpl
 import com.test.bragimovies.domain.repositiory.MovieRepository
+import com.test.bragimovies.domain.usecase.GetGenresUseCase
+import com.test.bragimovies.domain.usecase.GetMoviesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -10,6 +13,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -17,7 +21,7 @@ import javax.inject.Singleton
 object AppModule {
 
     private const val BASE_URL = "https://api.themoviedb.org/3/"
-    private const val API_KEY = "YOUR_API_KEY_HERE"
+    private const val API_KEY = BuildConfig.TMDB_API_KEY
 
     @Provides
     @Singleton
@@ -30,7 +34,11 @@ object AppModule {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().build())
+            .client(
+                OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS).build()
+            )
             .build()
             .create(MovieApi::class.java)
     }
@@ -39,8 +47,20 @@ object AppModule {
     @Singleton
     fun provideMovieRepository(
         api: MovieApi,
-        apiKey: String
+        @ApiKey apiKey: String
     ): MovieRepository {
         return MovieRepositoryImpl(api, apiKey)
     }
+
+    @Provides
+    @Singleton
+    fun provideGetGenresUseCase(
+        repository: MovieRepository
+    ): GetGenresUseCase = GetGenresUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetMoviesUseCase(
+        repository: MovieRepository
+    ): GetMoviesUseCase = GetMoviesUseCase(repository)
 }
