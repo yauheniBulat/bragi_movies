@@ -17,6 +17,7 @@ Open Android Studio.
 Choose "Open an existing project" and select the project directory.
 
 Add your TMDb API key:
+
 Find or create in the root of the project file local.properties and add string
 
 TMDB_API_KEY=your_key_here
@@ -43,7 +44,7 @@ Dependency Injection: Hilt
 Reactive Streams: Kotlin Coroutines + Flow
 
 📚 Libraries Used
-Library	Purpose
+
 Jetpack Compose	UI toolkit
 Hilt	Dependency Injection
 Retrofit	Network requests
